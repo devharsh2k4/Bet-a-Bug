@@ -1,4 +1,4 @@
-    # Bet-A-Bug
+    #Bet-A-Bug
 
     Bet-A-Bug is a gamified competitive coding platform designed to make coding challenges more engaging and exciting. The platform allows users to participate in versus battles, where two individuals face off in real-time coding challenges. Each player can place a bet, creating a prize pool that the winner takes home after the competition.
 
@@ -6,7 +6,7 @@
 
     The platform aims to combine the thrill of competition with skill-building, making coding more interactive and fun. By integrating features like matchmaking, ranking, and leaderboards, the platform encourages friendly competition, while ensuring fair play and a motivating experience for all participants.
 
-    ## Key Features
+    ##Key Features
 
     - **Versus Battles**: Engage in head-to-head coding duels with a prize pool.
     - **Matchmaking**: Pair with opponents based on skill level and preferences.
@@ -16,53 +16,42 @@
 
     In essence, our platform is designed to make competitive coding fun and rewarding, while also fostering personal development and healthy competition.
 
-    ## Installation
+   
 
-    To get started with Langlearn, follow these steps:
 
-    1. **Clone the repository**:
-        ```bash
-        git clone https://github.com/yourusername/langlearn.git
-        cd langlearn
-        ```
+This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
-    2. **Set up a virtual environment** (optional but recommended):
-        ```bash
-        python3 -m venv venv
-        source venv/bin/activate
-        ```
+## Getting Started
 
-    3. **Install the required dependencies**:
-        ```bash
-        pip install -r requirements.txt
-        ```
+First, run the development server:
 
-    4. **Run database migrations**:
-        ```bash
-        python manage.py migrate
-        ```
+```bash
+npm run dev
+# or
+yarn dev
+# or
+pnpm dev
+# or
+bun dev
+```
 
-    5. **Create a superuser** (for admin access):
-        ```bash
-        python manage.py createsuperuser
-        ```
+Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-    6. **Start the development server**:
-        ```bash
-        python manage.py runserver
-        ```
+You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
-    7. **Access the platform**:
-        Open your web browser and navigate to `http://127.0.0.1:8000/`.
+This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
-    ## Contributing
+## Learn More
 
-    We welcome contributions! Please read our [Contributing Guidelines](CONTRIBUTING.md) for more information on how to get involved.
+To learn more about Next.js, take a look at the following resources:
 
-    ## License
+- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
+- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
 
-    This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
 
-    ## Contact
+## Deploy on Vercel
 
-    For any inquiries or feedback, please contact us at [email@example.com](mailto:email@example.com).
+The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+
+Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
