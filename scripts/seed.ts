@@ -22,10 +22,10 @@ const main = async () => {
     await db.delete(schema.userSubscription);
 
     await db.insert(schema.courses).values([
-      { id: 1, title: "Spanish", imageSrc: "/es.svg" },
-      { id: 2, title: "French", imageSrc: "/fr.svg" },
-      { id: 3, title: "Croatian", imageSrc: "/hr.svg" },
-      { id: 4, title: "Italian", imageSrc: "/it.svg" },
+      { id: 1, title: "Node Js", imageSrc: "/node.svg" },
+      { id: 2, title: "Android", imageSrc: "/android.svg" },
+      { id: 3, title: "JavaScript", imageSrc: "/js.svg" },
+      { id: 4, title: "React js", imageSrc: "/react.svg" },
     ]);
 
     await db.insert(schema.units).values([
@@ -33,7 +33,7 @@ const main = async () => {
         id: 1,
         courseId: 1,
         title: "Unit 1",
-        description: "Learn the basics of Spanish",
+        description: "Learn the basics of Node Js",
         order: 1,
       },
     ]);
