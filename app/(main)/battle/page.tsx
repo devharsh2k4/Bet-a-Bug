@@ -68,7 +68,7 @@ const CodeBattleLandingPage: React.FC = () => {
           <form onSubmit={handleSubmit} className="flex flex-col items-center">
             <input
               type="text"
-              placeholder="Enter your name"
+              placeholder="choose a unique game name"
               value={name}
               onChange={(e) => setName(e.target.value)}
               className="px-4 py-2 mb-4 text-gray-900 rounded-lg border border-gray-300 focus:outline-none focus:ring focus:ring-blue-500"
