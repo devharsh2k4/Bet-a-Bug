@@ -9,11 +9,14 @@ import { ExitModal } from "@/components/modals/exit-modal";
 import { HeartsModal } from "@/components/modals/hearts-model";
 import { PracticeModal } from "@/components/modals/practice-modal";
 
+
 const nunito = Nunito({
   subsets: ["latin"],
   variable: "--font-nunito",
   weight: ["200", "300", "400", "500", "600", "700", "800", "900"],
 });
+
+
 
 export const metadata: Metadata = {
   title: "Create Next App",
