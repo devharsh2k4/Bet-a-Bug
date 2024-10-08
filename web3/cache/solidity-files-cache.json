@@ -1,0 +1,41 @@
+{
+  "_format": "hh-sol-cache-2",
+  "files": {
+    "/home/harsh/Documents/projects/langlearn/langlearn/web3/contracts/Battle.sol": {
+      "lastModificationDate": 1728409938455,
+      "contentHash": "6a8b9b6d22ca9801ea5bb9f278e16f2f",
+      "sourceName": "contracts/Battle.sol",
+      "solcConfig": {
+        "version": "0.8.27",
+        "settings": {
+          "evmVersion": "paris",
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.27"
+      ],
+      "artifacts": [
+        "CodingBattle"
+      ]
+    }
+  }
+}
