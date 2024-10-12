@@ -4,6 +4,7 @@ import Link from "next/link";
 import { SidebarItem } from "@/components/sidebar-item";
 import { ClerkLoading, ClerkLoaded, UserButton } from "@clerk/nextjs";
 import { Loader } from "lucide-react";
+
 type Props = {
   className?: string;
 };
@@ -12,7 +13,7 @@ export const Sidebar = ({ className }: Props) => {
   return (
     <div
       className={cn(
-        "flex h-full lg:w-[256px] lg:fixed left-0 top-0 px-4 border-r-2 flex-col ",
+        "flex h-full lg:w-[256px] lg:fixed left-0 top-0 px-4 border-r-2 flex-col",
         className
       )}
     >
@@ -24,7 +25,7 @@ export const Sidebar = ({ className }: Props) => {
           </h1>
         </div>
       </Link>
-      <div className="flex flex-col gap-y-2 flex-1">
+      <div className="flex flex-col gap-y-2 flex-1 overflow-y-auto max-h-[calc(100vh-64px)] scrollbar-hidden"> {/* Added custom class for hidden scrollbar */}
         <SidebarItem label="Learn" href="/learn" iconSrc="/learn.svg" />
         <SidebarItem
           label="Leaderboard"
@@ -36,13 +37,15 @@ export const Sidebar = ({ className }: Props) => {
         <SidebarItem label="Battle" href="/battle" iconSrc="/battle.svg" />
         <SidebarItem label="Custom" href="/custom" iconSrc="/custom.svg" />
         <SidebarItem label="Opportunities" href="/opportunities" iconSrc="/job.svg" />
+        <SidebarItem label="Course" href="/course" iconSrc="/course.png" />
+        <SidebarItem label="Dashboard" href="/dashboard" iconSrc="/dashboard.png" />
       </div>
       <div className="p-4">
         <ClerkLoading>
           <Loader className="h-5 w-5 text-muted-foreground animate-spin" />
         </ClerkLoading>
         <ClerkLoaded>
-          <UserButton/>
+          <UserButton />
         </ClerkLoaded>
       </div>
     </div>
