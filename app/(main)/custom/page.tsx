@@ -5,8 +5,7 @@ import io from 'socket.io-client';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 
-// Ensure you import the Nagato font in your global CSS or _app.tsx
-// Example: @import url('https://fonts.googleapis.com/css2?family=Nagato&display=swap');
+
 
 const socket = io('http://localhost:3001');
 
@@ -25,7 +24,7 @@ const CustomBattlePage: React.FC = () => {
 
     socket.on('roomJoined', (id: string) => {
       setRoomID(id);
-      setIsRoomFull(false); // Reset room full status
+      setIsRoomFull(false); 
     });
 
     socket.on('startBattle', () => {
@@ -45,15 +44,15 @@ const CustomBattlePage: React.FC = () => {
   }, [router]);
 
   const handleCreateRoom = () => {
-    const roomID = Math.random().toString(36).substring(2, 9); // Generate random room ID
+    const roomID = Math.random().toString(36).substring(2, 9); 
     socket.emit('createRoom', roomID);
-    setIsRoomFull(true); // Indicate that the room is being created
+    setIsRoomFull(true); 
   };
 
   const handleJoinRoom = () => {
     if (roomID) {
       socket.emit('joinRoom', roomID);
-      setIsRoomFull(true); // Indicate that the user is trying to join
+      setIsRoomFull(true); 
     } else {
       setErrorMessage('Please enter a valid Room ID');
     }
@@ -62,7 +61,7 @@ const CustomBattlePage: React.FC = () => {
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-white text-gray-800 p-4">
       <motion.h1
-        className="text-5xl font-extrabold mb-8 font-nagato" // Use the Nagato font class here
+        className="text-5xl font-extrabold mb-8 font-nagato" 
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 1 }}

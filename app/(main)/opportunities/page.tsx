@@ -12,12 +12,12 @@ interface Job {
     url: string;
 }
 
-const ITEMS_PER_PAGE = 9; // Define how many jobs to show per page
+const ITEMS_PER_PAGE = 9; 
 
 const OpportunitiesPage = () => {
     const [jobs, setJobs] = useState<Job[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
-    const [currentPage, setCurrentPage] = useState<number>(1); // State for tracking current page
+    const [currentPage, setCurrentPage] = useState<number>(1); 
 
     useEffect(() => {
         const fetchJobs = async () => {
@@ -45,25 +45,25 @@ const OpportunitiesPage = () => {
         fetchJobs();
     }, []);
 
-    // Function to handle "Apply Now" button click
+    
     const handleApplyClick = (url: string) => {
         window.open(url, '_blank', 'noopener,noreferrer');
     };
 
-    // Calculate the index range for the current page
+   
     const indexOfLastItem = currentPage * ITEMS_PER_PAGE;
     const indexOfFirstItem = indexOfLastItem - ITEMS_PER_PAGE;
     const currentJobs = jobs.slice(indexOfFirstItem, indexOfLastItem);
 
-    // Calculate total number of pages
+    
     const totalPages = Math.ceil(jobs.length / ITEMS_PER_PAGE);
 
-    // Function to handle page change
+    
     const handlePageChange = (pageNumber: number) => {
         setCurrentPage(pageNumber);
     };
 
-    // Render loading state
+   
     if (loading) {
         return (
             <div className="flex justify-center items-center h-screen">
@@ -79,7 +79,7 @@ const OpportunitiesPage = () => {
                     Remote Development Job Opportunities
                 </h1>
                 
-                {/* Job Listings */}
+                
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                     {currentJobs.map((job) => (
                         <div

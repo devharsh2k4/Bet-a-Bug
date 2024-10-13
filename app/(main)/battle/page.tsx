@@ -8,14 +8,14 @@ import Confetti from "react-confetti";
 import { useWindowSize } from "react-use";
 import { Button } from "@/components/ui/button";
 
-// Extend the Window interface to include Ethereum
+
 declare global {
   interface Window {
     ethereum: any;
   }
 }
 
-// Smart contract details
+
 const CONTRACT_ADDRESS = "0x5658f10fE45b021D578a1cbDaD4eD11e8868D0Cb";
 const CONTRACT_ABI = [
   {
@@ -65,10 +65,10 @@ export default function CodingBattle() {
   >(null);
   const [loading, setLoading] = useState(false);
   const [walletAddress, setWalletAddress] = useState<string | null>(null);
-  const [question, setQuestion] = useState<string>(""); // Question for coding battle
-  const [code, setCode] = useState<string>(""); // User's code submission
-  const [timeLeft, setTimeLeft] = useState<number>(300); // 5 minutes in seconds
-  const [result, setResult] = useState<string | null>(null); // Result of the battle
+  const [question, setQuestion] = useState<string>("");
+  const [code, setCode] = useState<string>(""); 
+  const [timeLeft, setTimeLeft] = useState<number>(300); 
+  const [result, setResult] = useState<string | null>(null); 
   const [showConfetti, setShowConfetti] = useState<boolean>(false);
 
   const matchTypes = [
@@ -97,7 +97,7 @@ export default function CodingBattle() {
 
   useEffect(() => {
     if (selectedMode) {
-      generateQuestion(); // Generate a question when mode is selected
+      generateQuestion(); 
     }
   }, [selectedMode]);
 
@@ -106,7 +106,7 @@ export default function CodingBattle() {
       const timer = setTimeout(() => setTimeLeft(timeLeft - 1), 1000);
       return () => clearTimeout(timer);
     } else if (timeLeft === 0) {
-      handleSubmit(); // Automatically submit when time runs out
+      handleSubmit(); 
     }
   }, [timeLeft]);
 
@@ -122,7 +122,7 @@ export default function CodingBattle() {
     setWalletAddress(accounts[0]);
   };
 
-  // Join the game (send 0.0001 ETH)
+ 
   const joinGame = async () => {
     if (!walletAddress) await connectWallet();
 
@@ -144,20 +144,20 @@ export default function CodingBattle() {
     }
   };
 
-  // Start the practice mode
+
   const startPractice = () => {
     setSelectedMode("Practice");
   };
 
-  // Generate a sample coding question
+ 
   const generateQuestion = () => {
     setQuestion("Write a function `add(a, b)` that returns the sum of two numbers.");
     setCode(`function add(a, b) {\n  // Your code here\n}`);
   };
 
-  // Compile and check the code
+ 
   const handleSubmit = () => {
-    // Compile and check in real-time (dummy logic for now)
+ 
     try {
       const isCorrect = eval(code + "; add(2, 3) === 5");
       if (isCorrect) {
@@ -165,7 +165,7 @@ export default function CodingBattle() {
         setShowConfetti(true);
         setResult("You won!");
         if (selectedMode === "Ranked") {
-          // Submit the result to the smart contract
+       
           submitSolution(true);
         }
       } else {
@@ -180,7 +180,7 @@ export default function CodingBattle() {
     }
   };
 
-  // Submit solution to smart contract in ranked mode
+
   const submitSolution = async (isCorrect: boolean) => {
     const provider = new ethers.providers.Web3Provider(window.ethereum);
     const signer = provider.getSigner();
@@ -194,7 +194,7 @@ export default function CodingBattle() {
     }
   };
 
-  // Confetti size from window
+
   const { width, height } = useWindowSize();
 
   return (
@@ -202,7 +202,7 @@ export default function CodingBattle() {
       {showConfetti && <Confetti width={width} height={height} />}
       {!selectedMatchType ? (
         <>
-          {/* Match Type Selection */}
+         
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
             {matchTypes.map(({ type, image, description }) => (
               <div
@@ -221,7 +221,7 @@ export default function CodingBattle() {
         </>
       ) : !selectedMode ? (
         <>
-          {/* Mode Selection */}
+          
           <div className="mt-12 grid grid-cols-1 sm:grid-cols-2 gap-6 justify-center items-center">
             <div
               onClick={() => setSelectedMode("Ranked")}
@@ -248,7 +248,7 @@ export default function CodingBattle() {
             {selectedMode === "Ranked" ? "Ranked Battle" : "Practice Mode"}
           </h2>
           <div className="bg-zinc-600 p-6 rounded-lg shadow-lg">
-            {/* Flex container to position Problem and Button */}
+           
             <div className="mb-4 flex justify-between items-start">
               <div>
                 <p className="text-left font-bold text-white">Problem:</p>
@@ -264,7 +264,7 @@ export default function CodingBattle() {
             </div>
 
             <MonacoEditor
-              height="400px" // Increased height
+              height="400px" 
               language="javascript"
               value={code}
               options={{

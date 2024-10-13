@@ -7,9 +7,9 @@ import { redirect } from "next/navigation";
 import { Progress } from "@/components/ui/progress";
 import { Promo } from "@/components/promo";
 import { quests } from "@/constants";
-import WalletActions from "@/components/WalletActions"; // Direct import for server-side rendering
+import WalletActions from "@/components/WalletActions"; 
 
-export const dynamic = "force-dynamic"; // This ensures that the page is rendered dynamically
+export const dynamic = "force-dynamic"; 
 
 const QuestsPage = async () => {
   // Fetch user progress and subscription data on the server
@@ -21,7 +21,7 @@ const QuestsPage = async () => {
     userSubscriptionData,
   ]);
 
-  // Redirect to courses page if there is no active course for the user
+ 
   if (!userProgress || !userProgress.activeCourse) {
     redirect("/courses");
   }

@@ -1,6 +1,6 @@
-    #Bet-A-Bug
+    #VegaBattle
 
-    Bet-A-Bug is a gamified competitive coding platform designed to make coding challenges more engaging and exciting. The platform allows users to participate in versus battles, where two individuals face off in real-time coding challenges. Each player can place a bet, creating a prize pool that the winner takes home after the competition.
+    VegaBattle is a gamified competitive coding platform designed to make coding challenges more engaging and exciting. The platform allows users to participate in versus battles, where two individuals face off in real-time coding challenges. Each player can place a bet, creating a prize pool that the winner takes home after the competition.
 
     In addition to head-to-head battles, the platform also features a solo mode where individual users can tackle coding challenges and earn rewards through a path of achievements. This mode tracks users' progress and provides a sense of growth and accomplishment.
 
