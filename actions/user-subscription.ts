@@ -36,7 +36,7 @@ export const createStripeUrl = async () => {
                 price_data : {
                     currency: "usd",
                     product_data: {
-                        name: "LangLearn Pro",
+                        name: "vegabattle Pro",
                         description: "Unlimited hearts",
                     },
                     unit_amount: 100,
