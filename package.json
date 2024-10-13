@@ -23,6 +23,7 @@
     "@radix-ui/react-slot": "^1.1.0",
     "@thirdweb-dev/react": "^4.9.4",
     "@tinymce/tinymce-react": "^5.1.1",
+    "alchemy-sdk": "^3.4.3",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
     "dotenv": "^16.4.5",
@@ -46,6 +47,7 @@
   },
   "devDependencies": {
     "@nomiclabs/hardhat-ethers": "^2.2.3",
+    "@openzeppelin/contracts": "^5.0.2",
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",

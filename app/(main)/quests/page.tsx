@@ -1,8 +1,5 @@
 import { FeedWrapper } from "@/components/feed-wrapper";
 import { StickyWrapper } from "@/components/sticky-wrapper";
-import { Avatar, AvatarImage } from "@/components/ui/avatar";
-
-import { Separator } from "@/components/ui/separator";
 import { UserProgress } from "@/components/user-progress";
 import { getUserProgress, getUserSubscription } from "@/db/queries";
 import Image from "next/image";
@@ -10,24 +7,30 @@ import { redirect } from "next/navigation";
 import { Progress } from "@/components/ui/progress";
 import { Promo } from "@/components/promo";
 import { quests } from "@/constants";
+import WalletActions from "@/components/WalletActions"; // Direct import for server-side rendering
+
+export const dynamic = "force-dynamic"; // This ensures that the page is rendered dynamically
 
 const QuestsPage = async () => {
-  
-  const userProgerssData = getUserProgress();
+  // Fetch user progress and subscription data on the server
+  const userProgressData = getUserProgress();
   const userSubscriptionData = getUserSubscription();
 
   const [userProgress, userSubscription] = await Promise.all([
-    userProgerssData,
+    userProgressData,
     userSubscriptionData,
   ]);
 
+  // Redirect to courses page if there is no active course for the user
   if (!userProgress || !userProgress.activeCourse) {
     redirect("/courses");
   }
 
   const isPro = !!userSubscription?.isActive;
+
   return (
     <div className="flex flex-row-reverse gap-[48px] px-6">
+      {/* Sidebar showing user's progress and promo */}
       <StickyWrapper>
         <UserProgress
           activeCourse={userProgress.activeCourse}
@@ -35,20 +38,26 @@ const QuestsPage = async () => {
           points={userProgress.points}
           hasActiveSubscription={isPro}
         />
-        {!isPro && <Promo/>}
+        {!isPro && <Promo />}
       </StickyWrapper>
 
+      {/* Main content for quests and wallet actions */}
       <FeedWrapper>
         <div className="w-full flex flex-col items-center">
           <Image src="/quests.svg" alt="quests" width={90} height={90} />
-          <h1 className="text-center font-bold text-neutral-800 text-2xl my-6 ">
+          <h1 className="text-center font-bold text-neutral-800 text-2xl my-6">
             Quests
           </h1>
           <p className="text-muted-foreground text-center text-lg mb-6">
             Complete Quests by earning points
           </p>
-          <ul className="w-full">
-            {quests.map((quest, index) => {
+
+          {/* Server-side WalletActions component handling wallet and minting functionality */}
+          <WalletActions quests={quests} userProgress={userProgress} />
+
+          {/* List of Quests */}
+          <ul className="w-full mt-4">
+            {quests.map((quest) => {
               const progress = (userProgress.points / quest.points) * 100;
 
               return (
@@ -61,10 +70,7 @@ const QuestsPage = async () => {
                     <p className="text-neutral-700 text-xl font-bold">
                       {quest.title}
                     </p>
-                    <Progress
-                    value={progress}
-                    className = "h-3"
-                    />
+                    <Progress value={progress} className="h-3" />
                   </div>
                 </div>
               );
