@@ -22,23 +22,30 @@ const OpportunitiesPage = () => {
     useEffect(() => {
         const fetchJobs = async () => {
             try {
-                const response = await fetch('https://remoteok.com/api');
-                const data = await response.json();
+            const response = await fetch('https://remoteok.com/api');
+            const data = await response.json();
 
-                const jobListings: Job[] = data.slice(1).map((job: any) => ({
+            const jobListings: Job[] = Array.isArray(data) && data.length > 1 ? data.slice(1).map((job) => {
+                if (job.id && job.position && job.company && job.description && job.url) {
+                return {
                     id: job.id,
                     position: job.position,
                     company: job.company,
                     location: job.location || 'Remote',
                     description: job.description,
                     url: job.url,
-                }));
+                };
+                } else {
+                console.warn('Invalid job data:', job);
+                return null;
+                }
+            }).filter((job): job is Job => job !== null) : [];
 
-                setJobs(jobListings);
+            setJobs(jobListings);
             } catch (error) {
-                console.error('Error fetching jobs:', error);
+            console.error('Error fetching jobs:', error);
             } finally {
-                setLoading(false);
+            setLoading(false);
             }
         };
 

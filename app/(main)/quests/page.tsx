@@ -7,7 +7,7 @@ import { redirect } from "next/navigation";
 import { Progress } from "@/components/ui/progress";
 import { Promo } from "@/components/promo";
 import { quests } from "@/constants";
-import WalletActions from "@/components/WalletActions"; 
+import WalletActions from "@/components/WalletActions";
 
 export const dynamic = "force-dynamic"; 
 

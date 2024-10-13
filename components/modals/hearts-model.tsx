@@ -17,7 +17,7 @@ import { useHeartsModal } from "@/store/use-hearts-modal";
 export const HeartsModal = () => {
   const router = useRouter();
   const [isClient, setIsClient] = useState(false);
-  const { isOpen, open, close } = useHeartsModal();
+  const { isOpen, close } = useHeartsModal();
 
   useEffect(() => {
     setIsClient(true);

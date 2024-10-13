@@ -10,7 +10,7 @@ import {
 } from "@/db/queries";
 import { UserProgress } from "@/components/user-progress";
 import { redirect } from "next/navigation";
-import { use } from "react";
+
 import { Unit } from "./unit";
 import { Promo } from "@/components/promo";
 import { Quests } from "@/components/quests";

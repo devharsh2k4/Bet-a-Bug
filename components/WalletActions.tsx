@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useEffect, useState } from "react";
@@ -17,16 +18,24 @@ interface WalletActionsProps {
 const WalletActions = ({ quests, userProgress }: WalletActionsProps) => {
   const [currentAccount, setCurrentAccount] = useState<string | null>(null);
   const [txHash, setTxHash] = useState<string | null>(null);
-  const [completedQuests, setCompletedQuests] = useState<number>(0);
-  const [nftMetadata, setNftMetadata] = useState<any>(null); // To store and display minted NFT metadata
+  interface NftMetadata {
+    image: string;
+    name: string;
+    description: string;
+  }
+
+  const [nftMetadata, setNftMetadata] = useState<NftMetadata | null>(null); // To store and display minted NFT metadata
 
   useEffect(() => {
     // Check if wallet is already connected
     const checkWalletConnection = async () => {
       if (window.ethereum) {
-        const accounts = await window.ethereum.request({ method: "eth_accounts" });
-        if (accounts.length > 0) {
-          setCurrentAccount(accounts[0]);
+        if (window.ethereum && window.ethereum.request) {
+          const accounts = await window.ethereum.request({ method: "eth_accounts" });
+
+          if (accounts.length > 0) {
+            setCurrentAccount(accounts[0]);
+          }
         }
       }
     };
@@ -37,12 +46,14 @@ const WalletActions = ({ quests, userProgress }: WalletActionsProps) => {
   // Connect user's wallet
   const connectWallet = async () => {
     if (window.ethereum) {
-      const accounts = await window.ethereum.request({
-        method: "eth_requestAccounts",
-      });
-      setCurrentAccount(accounts[0]);
-    } else {
-      console.error("MetaMask not found");
+      if (window.ethereum && window.ethereum.request) {
+        const accounts = await window.ethereum.request({
+          method: "eth_requestAccounts",
+        });
+        setCurrentAccount(accounts[0]);
+      } else {
+        console.error("MetaMask not found");
+      }
     }
   };
 
@@ -81,7 +92,7 @@ const WalletActions = ({ quests, userProgress }: WalletActionsProps) => {
 
   // Handle quest completion and mint appropriate NFT
   const handleQuestCompletion = (completed: number) => {
-    setCompletedQuests(completed);
+    // Handle quest completion logic here if needed
     if (completed === 1) {
       mintNFT(0); // Common NFT
     } else if (completed === 2) {

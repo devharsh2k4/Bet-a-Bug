@@ -17,8 +17,8 @@ export async function POST(req: Request) {
       signature,
       process.env.STRIPE_WEBHOOK_SECRET!
     );
-  } catch (error: any) {
-    return new NextResponse("Webhook error : ${error.message}", {
+  } catch (error) {
+    return new NextResponse(`Webhook error: ${error}`, {
       status: 400,
     });
   }
@@ -53,8 +53,6 @@ export async function POST(req: Request) {
         stripeCurrentPeriodEnd: new Date(subscription.current_period_end * 1000),
       }).where(eq(userSubscription.stripeSubscriptionId, subscription.id));
   }
-
-  
 
   return new NextResponse(null, { status: 200 });
 }

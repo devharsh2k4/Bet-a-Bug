@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Button } from './ui/button';
+import Image from 'next/image';
 
 // Helper to create an array of 365 days with dummy activity
 const getSubmissionActivity = () => {
@@ -37,7 +38,7 @@ const Dashboard: React.FC = () => {
   // Function to handle input change for social links
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setSocialLinks((prevLinks:any) => ({ ...prevLinks, [name]: value }));
+    setSocialLinks((prevLinks: typeof socialLinks) => ({ ...prevLinks, [name]: value }));
   };
 
   // Function to open the social media link in a new tab
@@ -62,7 +63,7 @@ const Dashboard: React.FC = () => {
       {/* Top section with profile details */}
       <div className="flex justify-between items-center">
         <div className="flex items-center space-x-4">
-          <img
+          <Image
             src="/profile-pic.jpg"
             alt="Profile"
             className="w-20 h-20 rounded-full border border-gray-300"

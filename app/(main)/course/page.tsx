@@ -1,4 +1,4 @@
-import Head from 'next/head';
+
 import Levels from '@/components/Levels';
 
 export default function Course() {

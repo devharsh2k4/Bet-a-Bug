@@ -27,6 +27,7 @@ export const ExitModal = () => {
     return null;
   }
   return (
+    console.log(open),
     <Dialog open={isOpen} onOpenChange={close}>
       <DialogContent className="max-w-md">
         <DialogHeader>

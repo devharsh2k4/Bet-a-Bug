@@ -1,19 +1,19 @@
 "use client"
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { ethers } from 'ethers';
-import { Alchemy, Network } from 'alchemy-sdk';
+
 import QuestNFT from '@/QuestNFT.json'; // Path to your ABI file
-import { quests, POINTS_TO_REFILL } from '@/constants';
+import { quests, } from '@/constants';
 import Image from 'next/image';
 import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
 
 const CONTRACT_ADDRESS = "0x3DfFcf8AFC8298f4a31eC518D28fA7BB7AF4Cf2C";
-const alchemy = new Alchemy({
-    apiKey: process.env.NEXT_PUBLIC_ALCHEMY_API_KEY,
-    network: Network.ETH_SEPOLIA
-});
+// const alchemy = new Alchemy({
+//     apiKey: process.env.NEXT_PUBLIC_ALCHEMY_API_KEY,
+//     network: Network.ETH_SEPOLIA
+// });
 
 interface QuestsProps {
     points: number;
@@ -22,15 +22,20 @@ interface QuestsProps {
 export const Quests = ({ points }: QuestsProps) => {
     const [currentAccount, setCurrentAccount] = useState<string | null>(null);
     const [txHash, setTxHash] = useState<string | null>(null);
-    const [completedQuests, setCompletedQuests] = useState<number>(0);
+    const [_completedQuests, setCompletedQuests] = useState<number>(0);
 
     // Connect user's wallet
     const connectWallet = async () => {
         if (window.ethereum) {
-            const accounts = await window.ethereum.request({
-                method: "eth_requestAccounts",
-            });
+            if (window.ethereum && window.ethereum.request) {
+                const accounts = await window.ethereum.request({
+                    method: "eth_requestAccounts",
+                });
+
             setCurrentAccount(accounts[0]);
+        } else {
+            console.error("Metamask not found or request method is undefined");
+        }
         } else {
             console.error("Metamask not found");
         }

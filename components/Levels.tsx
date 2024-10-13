@@ -1,5 +1,6 @@
 import React from 'react';
 import { Button } from './ui/button';
+import Image from 'next/image';
 
 type LevelCardProps = {
   title: string;
@@ -28,7 +29,7 @@ const LevelCard: React.FC<LevelCardProps> = ({
 }) => {
   return (
     <div className=" text-white bg-slate-600 rounded-lg shadow-md p-6 relative">
-      <img
+      <Image
         src={image}
         alt={title}
         className="w-full h-40 object-cover rounded-t-lg"

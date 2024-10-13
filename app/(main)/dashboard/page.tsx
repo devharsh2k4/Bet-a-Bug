@@ -1,4 +1,4 @@
-import type { NextPage } from 'next';
+
 import Dashboard from '@/components/DashboardItems';
 
 const DashboardPage= () => {

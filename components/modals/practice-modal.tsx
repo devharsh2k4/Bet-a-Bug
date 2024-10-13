@@ -15,9 +15,9 @@ import {
 import { Button } from "@/components/ui/button";
 import { usePracticeModal } from "@/store/use-practice-modal"; 
 export const PracticeModal = () => {
-  const router = useRouter();
+  const _router = useRouter();
   const [isClient, setIsClient] = useState(false);
-  const { isOpen, open, close } = usePracticeModal();
+  const { isOpen,  close } = usePracticeModal();
 
   useEffect(() => {
     setIsClient(true);
