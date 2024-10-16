@@ -31,6 +31,8 @@ const LevelCard: React.FC<LevelCardProps> = ({
     <div className=" text-white bg-slate-600 rounded-lg shadow-md p-6 relative">
       <Image
         src={image}
+        width={200}
+        height={200}
         alt={title}
         className="w-full h-40 object-cover rounded-t-lg"
       />

@@ -65,6 +65,8 @@ const Dashboard: React.FC = () => {
         <div className="flex items-center space-x-4">
           <Image
             src="/profile-pic.jpg"
+            height={80}
+            width={80}
             alt="Profile"
             className="w-20 h-20 rounded-full border border-gray-300"
           />

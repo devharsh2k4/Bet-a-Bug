@@ -7,6 +7,7 @@ import Image from "next/image";
 import Confetti from "react-confetti";
 import { useWindowSize } from "react-use";
 import { Button } from "@/components/ui/button";
+import styles from './CodingBattle.module.css'; // You can define additional CSS styles here
 
 declare global {
   interface Window {
@@ -57,12 +58,8 @@ const CONTRACT_ABI = [
 ];
 
 export default function CodingBattle() {
-  const [selectedMode, setSelectedMode] = useState<
-    "Ranked" | "Practice" | null
-  >(null);
-  const [selectedMatchType, setSelectedMatchType] = useState<
-    "1v1" | "TagTeam" | "TripleThreat" | "FatalFourWay" | "RoyalRumble" | null
-  >(null);
+  const [selectedMode, setSelectedMode] = useState<"Ranked" | "Practice" | null>(null);
+  const [selectedMatchType, setSelectedMatchType] = useState<"1v1" | "TagTeam" | "TripleThreat" | "FatalFourWay" | "RoyalRumble" | null>(null);
   const [loading, setLoading] = useState(false);
   const [walletAddress, setWalletAddress] = useState<string | null>(null);
   const [question, setQuestion] = useState<string>("");
@@ -71,29 +68,12 @@ export default function CodingBattle() {
   const [result, setResult] = useState<string | null>(null);
   const [showConfetti, setShowConfetti] = useState<boolean>(false);
 
-
   const matchTypes = [
     { type: "1v1", image: "/onevone.webp", description: "Classic 1v1 battle." },
-    {
-      type: "Tag Team",
-      image: "/tagteam.webp",
-      description: "Team up with a partner for a duo showdown.",
-    },
-    {
-      type: "Triple Threat",
-      image: "/tripleThreat.webp",
-      description: "Three players, one winner. All vs all.",
-    },
-    {
-      type: "Fatal Four Way",
-      image: "/fatal4way.webp",
-      description: "Four players face off in a brutal contest.",
-    },
-    {
-      type: "Royal Rumble",
-      image: "/royalrumble.webp",
-      description: "A battle royale-style match with multiple players.",
-    },
+    { type: "Tag Team", image: "/tagteam.webp", description: "Team up with a partner for a duo showdown." },
+    { type: "Triple Threat", image: "/tripleThreat.webp", description: "Three players, one winner. All vs all." },
+    { type: "Fatal Four Way", image: "/fatal4way.webp", description: "Four players face off in a brutal contest." },
+    { type: "Royal Rumble", image: "/royalrumble.webp", description: "A battle royale-style match with multiple players." },
   ];
 
   useEffect(() => {
@@ -109,9 +89,8 @@ export default function CodingBattle() {
     } else if (timeLeft === 0) {
       handleSubmit();
     }
-  }, );
+  }, [timeLeft, selectedMode]);
 
-  // Connect wallet using MetaMask
   const connectWallet = async (): Promise<void> => {
     if (!window.ethereum) {
       alert("Please install MetaMask to continue.");
@@ -128,17 +107,11 @@ export default function CodingBattle() {
 
     const provider = new ethers.providers.Web3Provider(window.ethereum);
     const signer = provider.getSigner();
-    const contract = new ethers.Contract(
-      CONTRACT_ADDRESS,
-      CONTRACT_ABI,
-      signer
-    );
+    const contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
 
     try {
       setLoading(true);
-      const tx = await contract.joinGame({
-        value: ethers.utils.parseEther("0.0001"),
-      });
+      const tx = await contract.joinGame({ value: ethers.utils.parseEther("0.0001") });
       await tx.wait();
       alert("Successfully joined the game!");
     } catch (error) {
@@ -151,16 +124,14 @@ export default function CodingBattle() {
   const startPractice = () => {
     setSelectedMode("Practice");
   };
-  
+
   const startRanked = async () => {
     setSelectedMode("Ranked");
     await joinGame();
   };
 
   const generateQuestion = () => {
-    setQuestion(
-      "Write a function `add(a, b)` that returns the sum of two numbers."
-    );
+    setQuestion("Write a function `add(a, b)` that returns the sum of two numbers.");
     setCode(`function add(a, b) {\n  // Your code here\n}`);
   };
 
@@ -189,11 +160,7 @@ export default function CodingBattle() {
   const submitSolution = async (isCorrect: boolean) => {
     const provider = new ethers.providers.Web3Provider(window.ethereum);
     const signer = provider.getSigner();
-    const contract = new ethers.Contract(
-      CONTRACT_ADDRESS,
-      CONTRACT_ABI,
-      signer
-    );
+    const contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
 
     try {
       const tx = await contract.submitSolution(isCorrect);
@@ -205,91 +172,53 @@ export default function CodingBattle() {
 
   const { width, height } = useWindowSize();
 
-  console.log(loading);
   return (
     <div className="h-screen flex flex-col items-center justify-center text-black p-6">
-      
       {showConfetti && <Confetti width={width} height={height} />}
+
       {!selectedMatchType ? (
         <>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
             {matchTypes.map(({ type, image, description }) => (
               <div
                 key={type}
                 className={`border-2 rounded-lg p-6 cursor-pointer shadow-lg hover:shadow-xl transition transform hover:scale-105 ${
-                  selectedMatchType === type
-                    ? "border-green-500"
-                    : "border-gray-300"
+                  selectedMatchType === type ? "border-green-500" : "border-gray-300"
                 }`}
                 onClick={() => setSelectedMatchType(type as "1v1" | "TagTeam" | "TripleThreat" | "FatalFourWay" | "RoyalRumble")}
               >
                 <Image
                   src={image}
                   alt={type}
-                  className="h-24 w-full object-cover mb-4 rounded"
+                  height={200}
+                  width={200}
+                  className="h-32 w-full object-cover mb-4 rounded-lg shadow-md"
                 />
                 <h3 className="text-xl font-semibold text-center">{type}</h3>
-                <p className="text-sm text-center text-gray-500 mt-2">
-                  {description}
-                </p>
+                <p className="text-sm text-center text-gray-500 mt-2">{description}</p>
               </div>
             ))}
-            <div
-              onClick={startRanked}
-              className="cursor-pointer bg-white p-8 rounded-lg shadow-lg hover:shadow-xl hover:scale-105 transform transition border-2 border-blue-500 flex flex-col items-center"
-            >
-              <h3 className="text-2xl font-bold text-center text-blue-500">
-                Ranked
-              </h3>
-              <Image
-                src={"/public/battle.svg"}
-                alt="Ranked"
-                width={100}
-                height={100}
-              />
-              <p className="text-gray-500 text-center mt-2">
-                Compete and win ETH in ranked mode.
-              </p>
-            <p className="text-gray-500 text-center mt-2">
-              Compete and win ETH in ranked mode.
-            </p>
           </div>
 
-            <div
-              onClick={startPractice}
-              className="cursor-pointer bg-white p-8 rounded-lg shadow-lg hover:shadow-xl hover:scale-105 transform transition border-2 border-green-500 flex flex-col items-center"
-            >
-              <h3 className="text-2xl font-bold text-center text-green-500">
-                Practice
-              </h3>
-              <Image
-                src={"/public/battle.svg"}
-                alt="Practice"
-                width={100}
-                height={100}
-              />
-              <p className="text-gray-500 text-center mt-2">
-                Try challenges for free in practice mode.
-              </p>
-            </div>
+          <div className="flex space-x-4">
+            <Button onClick={startRanked} className="px-8 py-4 bg-blue-500 text-white font-bold rounded-lg shadow-lg">
+              Start Ranked
+            </Button>
+            <Button onClick={startPractice} className="px-8 py-4 bg-green-500 text-white font-bold rounded-lg shadow-lg">
+              Start Practice
+            </Button>
           </div>
         </>
       ) : (
         <div className="text-center w-full max-w-4xl">
-          <h2 className="text-3xl mb-6 font-bold">
-            {selectedMode === "Ranked" ? "Ranked Battle" : "Practice Mode"}
-          </h2>
-          <div className="bg-zinc-600 p-6 rounded-lg shadow-lg">
+          <h2 className="text-3xl mb-6 font-bold">{selectedMode === "Ranked" ? "Ranked Battle" : "Practice Mode"}</h2>
+          <div className="bg-gray-700 p-6 rounded-lg shadow-lg">
             <div className="mb-4 flex justify-between items-start">
               <div>
                 <p className="text-left font-bold text-white">Problem:</p>
                 <p className="text-white">{question}</p>
               </div>
-              <Button
-                className="ml-4 px-8 py-2"
-                variant="primary"
-                onClick={handleSubmit}
-              >
+              <Button className="ml-4 px-8 py-2" variant="primary" onClick={handleSubmit}>
                 Submit Solution
               </Button>
             </div>
@@ -298,24 +227,16 @@ export default function CodingBattle() {
               height="400px"
               language="javascript"
               value={code}
-              options={{
-                theme: "gray-dark",
-                minimap: { enabled: false },
-                fontSize: 16,
-              }}
+              options={{ theme: "vs-dark", minimap: { enabled: false }, fontSize: 16 }}
               onChange={(value) => setCode(value || "")}
             />
           </div>
 
           {timeLeft > 0 && selectedMode === "Ranked" && (
-            <p className="mt-4 text-red-500 text-lg font-semibold">
-              Time Left: {timeLeft} seconds
-            </p>
+            <p className="mt-4 text-red-500 text-lg font-semibold">Time Left: {timeLeft} seconds</p>
           )}
 
-          {result && (
-            <p className="mt-6 text-2xl font-bold text-green-500">{result}</p>
-          )}
+          {result && <p className="mt-6 text-2xl font-bold text-green-500">{result}</p>}
         </div>
       )}
     </div>
