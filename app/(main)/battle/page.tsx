@@ -1,13 +1,13 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { ethers } from "ethers";
 import MonacoEditor from "@monaco-editor/react";
 import Image from "next/image";
 import Confetti from "react-confetti";
 import { useWindowSize } from "react-use";
 import { Button } from "@/components/ui/button";
-import styles from './CodingBattle.module.css'; // You can define additional CSS styles here
+import { useRouter } from "next/navigation"; // Import useRouter
 
 declare global {
   interface Window {
@@ -57,39 +57,67 @@ const CONTRACT_ABI = [
   },
 ];
 
+const matchTypes = [
+  { type: "1v1", image: "/onevone.webp", description: "Classic 1v1 battle." },
+  { type: "TagTeam", image: "/tagteam.webp", description: "Team up with a partner for a duo showdown." },
+  { type: "TripleThreat", image: "/tripleThreat.webp", description: "Three players, one winner. All vs all." },
+  { type: "FatalFourWay", image: "/fatal4way.webp", description: "Four players face off in a brutal contest." },
+  { type: "RoyalRumble", image: "/royalrumble.webp", description: "A battle royale-style match with multiple players." },
+];
+
 export default function CodingBattle() {
+  const [step, setStep] = useState<1 | 2>(1); // Step 1: Select Match, Step 2: Select Mode
+  const [selectedMatchType, setSelectedMatchType] = useState<string | null>(null);
   const [selectedMode, setSelectedMode] = useState<"Ranked" | "Practice" | null>(null);
-  const [selectedMatchType, setSelectedMatchType] = useState<"1v1" | "TagTeam" | "TripleThreat" | "FatalFourWay" | "RoyalRumble" | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [_loading, setLoading] = useState(false);
   const [walletAddress, setWalletAddress] = useState<string | null>(null);
-  const [question, setQuestion] = useState<string>("");
-  const [code, setCode] = useState<string>("");
-  const [timeLeft, setTimeLeft] = useState<number>(300);
+  const [question, setQuestion] = useState<string>("function add(a, b) {\n  // Your code here\n}");
+  const [timeLeft, setTimeLeft] = useState<number>(0); // Timer initially 0
   const [result, setResult] = useState<string | null>(null);
   const [showConfetti, setShowConfetti] = useState<boolean>(false);
+  const [_cameraStream, _setCameraStream] = useState<MediaStream | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false); // For showing submission animation
+  const [matchStarted, setMatchStarted] = useState(false); // Tracks if the match has started
+  const router = useRouter(); // Initialize useRouter
+  const [socket, setSocket] = useState<WebSocket | null>(null);
 
-  const matchTypes = [
-    { type: "1v1", image: "/onevone.webp", description: "Classic 1v1 battle." },
-    { type: "Tag Team", image: "/tagteam.webp", description: "Team up with a partner for a duo showdown." },
-    { type: "Triple Threat", image: "/tripleThreat.webp", description: "Three players, one winner. All vs all." },
-    { type: "Fatal Four Way", image: "/fatal4way.webp", description: "Four players face off in a brutal contest." },
-    { type: "Royal Rumble", image: "/royalrumble.webp", description: "A battle royale-style match with multiple players." },
-  ];
-
-  useEffect(() => {
-    if (selectedMode) {
-      generateQuestion();
-    }
-  }, [selectedMode]);
+  const cameraRef = useRef<HTMLVideoElement | null>(null);
+  const { width, height } = useWindowSize();
 
   useEffect(() => {
-    if (selectedMode === "Ranked" && timeLeft > 0) {
-      const timer = setTimeout(() => setTimeLeft(timeLeft - 1), 1000);
-      return () => clearTimeout(timer);
-    } else if (timeLeft === 0) {
-      handleSubmit();
-    }
-  }, [timeLeft, selectedMode]);
+    const ws = new WebSocket('ws://localhost:8080'); // Connect to WebSocket server
+    setSocket(ws);
+
+    ws.onmessage = (message) => {
+      const data = JSON.parse(message.data);
+
+      switch (data.type) {
+        case 'matchStart':
+          setMatchStarted(true);
+          setTimeLeft(300);
+          break;
+
+        case 'matchReady':
+          alert(data.message);
+          break;
+
+        case 'matchEnd':
+          setResult(data.result);
+          setShowConfetti(true);
+          setTimeout(() => {
+            router.push('/battle');
+          }, 2000);
+          break;
+
+        default:
+          break;
+      }
+    };
+
+    return () => {
+      ws.close(); // Cleanup WebSocket connection
+    };
+  }, [router]);
 
   const connectWallet = async (): Promise<void> => {
     if (!window.ethereum) {
@@ -102,90 +130,54 @@ export default function CodingBattle() {
     setWalletAddress(accounts[0]);
   };
 
-  const joinGame = async () => {
+  const joinRankedGame = async () => {
     if (!walletAddress) await connectWallet();
 
+    // Send message to WebSocket server to join ranked match
+    socket?.send(JSON.stringify({ type: 'joinRanked' }));
+
+    // Place bet
     const provider = new ethers.providers.Web3Provider(window.ethereum);
     const signer = provider.getSigner();
     const contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
 
     try {
       setLoading(true);
+      setIsSubmitting(true); // Start submission animation
       const tx = await contract.joinGame({ value: ethers.utils.parseEther("0.0001") });
       await tx.wait();
-      alert("Successfully joined the game!");
+
+      socket?.send(JSON.stringify({ type: 'betPlaced', matchId: 'some_match_id' }));
     } catch (error) {
       console.error("Error joining game:", error);
     } finally {
       setLoading(false);
+      setIsSubmitting(false); // Stop submission animation
     }
   };
 
-  const startPractice = () => {
-    setSelectedMode("Practice");
+  const handleSubmit = async () => {
+    const isCorrect = eval(question + "; add(2, 3) === 5");
+    socket?.send(JSON.stringify({ type: 'submitSolution', result: isCorrect ? 'win' : 'lose', matchId: 'some_match_id' }));
   };
-
-  const startRanked = async () => {
-    setSelectedMode("Ranked");
-    await joinGame();
-  };
-
-  const generateQuestion = () => {
-    setQuestion("Write a function `add(a, b)` that returns the sum of two numbers.");
-    setCode(`function add(a, b) {\n  // Your code here\n}`);
-  };
-
-  const handleSubmit = () => {
-    try {
-      const isCorrect = eval(code + "; add(2, 3) === 5");
-      if (isCorrect) {
-        alert("Correct answer submitted!");
-        setShowConfetti(true);
-        setResult("You won!");
-        if (selectedMode === "Ranked") {
-          submitSolution(true);
-        }
-      } else {
-        alert("Incorrect solution. Please try again.");
-        if (selectedMode === "Ranked") {
-          submitSolution(false);
-        }
-      }
-    } catch (error) {
-      console.error("Error compiling code:", error);
-      alert("There is an error in your code.");
-    }
-  };
-
-  const submitSolution = async (isCorrect: boolean) => {
-    const provider = new ethers.providers.Web3Provider(window.ethereum);
-    const signer = provider.getSigner();
-    const contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
-
-    try {
-      const tx = await contract.submitSolution(isCorrect);
-      await tx.wait();
-    } catch (error) {
-      console.error("Error submitting solution:", error);
-    }
-  };
-
-  const { width, height } = useWindowSize();
 
   return (
     <div className="h-screen flex flex-col items-center justify-center text-black p-6">
       {showConfetti && <Confetti width={width} height={height} />}
 
-      {!selectedMatchType ? (
+      {/* Step 1: Select Match Type */}
+      {step === 1 && !selectedMatchType && (
         <>
+          <h2 className="text-4xl mb-6 font-bold">Select Match Type</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
             {matchTypes.map(({ type, image, description }) => (
               <div
                 key={type}
-                className={`border-2 rounded-lg p-6 cursor-pointer shadow-lg hover:shadow-xl transition transform hover:scale-105 ${
-                  selectedMatchType === type ? "border-green-500" : "border-gray-300"
-                }`}
-                onClick={() => setSelectedMatchType(type as "1v1" | "TagTeam" | "TripleThreat" | "FatalFourWay" | "RoyalRumble")}
+                className="border-2 rounded-lg p-6 cursor-pointer shadow-lg hover:shadow-xl transition transform hover:scale-105 border-gray-300"
+                onClick={() => {
+                  setSelectedMatchType(type); // Setting the selected match type
+                  setStep(2); // Move to step 2 after selecting match type
+                }}
               >
                 <Image
                   src={image}
@@ -199,21 +191,30 @@ export default function CodingBattle() {
               </div>
             ))}
           </div>
+        </>
+      )}
 
+      {/* Step 2: Select Mode (Ranked or Practice) */}
+      {step === 2 && selectedMatchType && !selectedMode && (
+        <>
+          <h2 className="text-4xl mb-6 font-bold">Selected Match: {selectedMatchType}</h2>
           <div className="flex space-x-4">
-            <Button onClick={startRanked} className="px-8 py-4 bg-blue-500 text-white font-bold rounded-lg shadow-lg">
+            <Button onClick={joinRankedGame} className="px-8 py-4 bg-blue-500 text-white font-bold rounded-lg shadow-lg">
               Start Ranked
             </Button>
-            <Button onClick={startPractice} className="px-8 py-4 bg-green-500 text-white font-bold rounded-lg shadow-lg">
+            <Button onClick={() => setSelectedMode("Practice")} className="px-8 py-4 bg-green-500 text-white font-bold rounded-lg shadow-lg">
               Start Practice
             </Button>
           </div>
         </>
-      ) : (
-        <div className="text-center w-full max-w-4xl">
+      )}
+
+      {/* Game Interface: Code Editor */}
+      {selectedMode && (
+        <div className="text-center w-full max-w-4xl mt-6">
           <h2 className="text-3xl mb-6 font-bold">{selectedMode === "Ranked" ? "Ranked Battle" : "Practice Mode"}</h2>
-          <div className="bg-gray-700 p-6 rounded-lg shadow-lg">
-            <div className="mb-4 flex justify-between items-start">
+          <div className="bg-gray-700 p-6 mt-16 rounded-lg shadow-lg relative">
+            <div className="mb-4  flex justify-between items-start">
               <div>
                 <p className="text-left font-bold text-white">Problem:</p>
                 <p className="text-white">{question}</p>
@@ -223,20 +224,34 @@ export default function CodingBattle() {
               </Button>
             </div>
 
+            {isSubmitting && (
+              <div className="absolute inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
+                <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-white"></div>
+                <p className="text-white font-bold mt-4">Submitting Amount...</p>
+              </div>
+            )}
+
             <MonacoEditor
-              height="400px"
+              height="300px"
               language="javascript"
-              value={code}
+              value={question}
               options={{ theme: "vs-dark", minimap: { enabled: false }, fontSize: 16 }}
-              onChange={(value) => setCode(value || "")}
+              onChange={(value) => setQuestion(value || "")}
             />
           </div>
 
-          {timeLeft > 0 && selectedMode === "Ranked" && (
+          {timeLeft > 0 && selectedMode === "Ranked" && matchStarted && (
             <p className="mt-4 text-red-500 text-lg font-semibold">Time Left: {timeLeft} seconds</p>
           )}
 
           {result && <p className="mt-6 text-2xl font-bold text-green-500">{result}</p>}
+        </div>
+      )}
+
+      {/* Camera feed - Moved to top right and always visible when match starts */}
+      {matchStarted && (
+        <div className="fixed top-1 right-4 w-52 h-32 border border-white z-50">
+          <video ref={cameraRef} autoPlay playsInline className="w-full h-full object-cover"></video>
         </div>
       )}
     </div>

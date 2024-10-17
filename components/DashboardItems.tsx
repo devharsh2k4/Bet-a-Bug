@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from './ui/button';
 import Image from 'next/image';
+import { useUser } from "@clerk/nextjs";
 
 // Helper to create an array of 365 days with dummy activity
 const getSubmissionActivity = () => {
@@ -19,9 +20,12 @@ const getMonths = (activity: boolean[]) => {
 };
 
 const Dashboard: React.FC = () => {
+  // Fetch user information from Clerk
+  const { user } = useUser();
+
   // Retrieve the social media links from local storage or set defaults
-  const storedSocialLinks = localStorage.getItem('socialLinks');
-  
+  const storedSocialLinks = typeof window !== 'undefined' ? localStorage.getItem('socialLinks') : null;
+
   const [socialLinks, setSocialLinks] = useState(
     storedSocialLinks ? JSON.parse(storedSocialLinks) : {
       linkedin: '',
@@ -55,7 +59,9 @@ const Dashboard: React.FC = () => {
 
   // Save social links to local storage whenever they are updated
   useEffect(() => {
-    localStorage.setItem('socialLinks', JSON.stringify(socialLinks));
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('socialLinks', JSON.stringify(socialLinks));
+    }
   }, [socialLinks]);
 
   return (
@@ -64,14 +70,17 @@ const Dashboard: React.FC = () => {
       <div className="flex justify-between items-center">
         <div className="flex items-center space-x-4">
           <Image
-            src="/profile-pic.jpg"
+            src={user?.imageUrl || '/profile-pic.jpg'} // Use Clerk profile image or fallback
             height={80}
             width={80}
             alt="Profile"
             className="w-20 h-20 rounded-full border border-gray-300"
           />
           <div>
-            <h2 className="text-xl font-semibold">Harsh Vardhan</h2>
+            <h2 className="text-xl font-semibold">
+              {/* Display the user's username from Clerk */}
+              {user?.username || user?.firstName || 'User'}
+            </h2>
             <p className="text-gray-600">Rank: 2,534,405</p>
           </div>
         </div>
