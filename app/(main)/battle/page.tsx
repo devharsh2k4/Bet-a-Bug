@@ -61,7 +61,7 @@ export default function CodingBattle() {
   const [step, setStep] = useState<1 | 2>(1); // Step 1: Select Match, Step 2: Select Mode
   const [selectedMatchType, setSelectedMatchType] = useState<"1v1" | "TagTeam" | "TripleThreat" | "FatalFourWay" | "RoyalRumble" | null>(null);
   const [selectedMode, setSelectedMode] = useState<"Ranked" | "Practice" | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [_loading, setLoading] = useState(false);
   const [walletAddress, setWalletAddress] = useState<string | null>(null);
   const [question, setQuestion] = useState<string>("function add(a, b) {\n  // Your code here\n}");
   const [timeLeft, setTimeLeft] = useState<number>(0); // Timer initially 0

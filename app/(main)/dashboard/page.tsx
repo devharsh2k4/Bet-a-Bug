@@ -1,10 +1,10 @@
 import Dashboard from '@/components/DashboardItems'; // Your existing dashboard component
 import { FeedWrapper } from "@/components/feed-wrapper";
-import { Promo } from "@/components/promo";
-import { StickyWrapper } from "@/components/sticky-wrapper";
+
+
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
-import { UserProgress } from "@/components/user-progress";
+
 import {
   getTopTenUsers,
   getUserProgress,
@@ -19,7 +19,7 @@ const DashboardPage = async () => {
   const userSubscriptionData = getUserSubscription();
   const leaderboardData = getTopTenUsers();
 
-  const [userProgress, userSubscription, leaderboard] = await Promise.all([
+  const [userProgress, _userSubscription, leaderboard] = await Promise.all([
     userProgerssData,
     userSubscriptionData,
     leaderboardData,
@@ -29,7 +29,7 @@ const DashboardPage = async () => {
     redirect("/courses");
   }
 
-  const isPro = !!userSubscription?.isActive;
+  // const isPro = !!userSubscription?.isActive;
 
   return (
     <div className="flex flex-col lg:flex-row justify-between gap-[48px] px-6">

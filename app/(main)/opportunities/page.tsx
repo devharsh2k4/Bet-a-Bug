@@ -22,30 +22,35 @@ const OpportunitiesPage = () => {
     useEffect(() => {
         const fetchJobs = async () => {
             try {
-            const response = await fetch('https://remoteok.com/api');
-            const data = await response.json();
+                const response = await fetch('https://remoteok.com/api');
+                const data = await response.json();
 
-            const jobListings: Job[] = Array.isArray(data) && data.length > 1 ? data.slice(1).map((job) => {
-                if (job.id && job.position && job.company && job.description && job.url) {
-                return {
-                    id: job.id,
-                    position: job.position,
-                    company: job.company,
-                    location: job.location || 'Remote',
-                    description: job.description,
-                    url: job.url,
-                };
-                } else {
-                console.warn('Invalid job data:', job);
-                return null;
-                }
-            }).filter((job): job is Job => job !== null) : [];
+                // Filter for software developer-related jobs
+                const developerKeywords = ["developer", "software", "engineer", "full stack", "backend", "frontend"];
+                const jobListings: Job[] = Array.isArray(data) && data.length > 1 ? data.slice(1).map((job) => {
+                    if (job.id && job.position && job.company && job.description && job.url) {
+                        return {
+                            id: job.id,
+                            position: job.position,
+                            company: job.company,
+                            location: job.location || 'Remote',
+                            description: job.description,
+                            url: job.url,
+                        };
+                    } else {
+                        console.warn('Invalid job data:', job);
+                        return null;
+                    }
+                }).filter((job): job is Job => job !== null)
+                .filter((job) => 
+                    developerKeywords.some((keyword) => job.position.toLowerCase().includes(keyword))
+                ) : [];
 
-            setJobs(jobListings);
+                setJobs(jobListings);
             } catch (error) {
-            console.error('Error fetching jobs:', error);
+                console.error('Error fetching jobs:', error);
             } finally {
-            setLoading(false);
+                setLoading(false);
             }
         };
 
@@ -83,7 +88,7 @@ const OpportunitiesPage = () => {
         <div className="min-h-screen bg-gray-50 py-10 px-5">
             <div className="max-w-7xl mx-auto">
                 <h1 className="text-4xl font-bold text-center text-gray-800 mb-10">
-                    Remote Development Job Opportunities
+                    Remote Software Development Job Opportunities
                 </h1>
                 
                 
@@ -91,7 +96,7 @@ const OpportunitiesPage = () => {
                     {currentJobs.map((job) => (
                         <div
                             key={job.id}
-                            className=" shadow-lg rounded-lg p-6 hover:shadow-xl transition-shadow duration-300"
+                            className="shadow-lg rounded-lg p-6 hover:shadow-xl transition-shadow duration-300"
                         >
                             <h2 className="text-2xl font-semibold text-gray-800 mb-2">{job.position}</h2>
                             <p className="text-gray-600 text-sm mb-2">{job.company}</p>

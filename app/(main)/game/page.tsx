@@ -1,15 +1,31 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import GameCanvas from "@/components/GameCanvas"; // Your custom game component
+import dynamic from 'next/dynamic';
 import CodeEditor from "@/components/CodeEditor"; // Your custom code editor component
 import { Button } from "@/components/ui/button"; // Import your button component
+
+// Dynamically import the GameCanvas component to avoid server-side rendering
+const GameCanvas = dynamic(() => import('@/components/GameCanvas'), { ssr: false });
 
 const GamePage = () => {
   const [unit, setUnit] = useState<number>(1);
   const [userCode, setUserCode] = useState<string>(""); // Code state for editor
   const [showSidebar, setShowSidebar] = useState<boolean>(true); // Toggle sidebar visibility
   const [gameStarted, setGameStarted] = useState<boolean>(false); // Track if the game is started
+
+  const unitDescriptions = [
+    "Create Platforms and Character",
+    "Add Character Movement",
+    "Add Gravity to Player",
+    "Add Jumping to Player",
+    "Add Enemy Movement",
+    "Implement a Score System",
+    "Create Collectible Items",
+    "Game Over Condition",
+    "Add Sound Effects",
+    "Add Background Music"
+  ];
 
   const loadUnitCode = (unitNumber: number): string => {
     switch (unitNumber) {
@@ -40,6 +56,74 @@ function update () {
     player.setVelocityY(-330);
   }
 }`;
+      case 3:
+        return `// Unit 3: Add Gravity to Player
+// Apply gravity to the player, making them fall when not on a platform.
+player.setGravityY(300);`;
+      case 4:
+        return `// Unit 4: Add Jumping to Player
+// Implement jumping mechanics for the player.
+if (this.cursors.up.isDown && player.body.touching.down) {
+  player.setVelocityY(-330); // Jump with velocity
+}`;
+      case 5:
+        return `// Unit 5: Add Enemy Movement
+// Create an enemy that moves left and right.
+const enemy = this.physics.add.sprite(300, 200, 'enemy');
+enemy.setBounce(1);
+enemy.setCollideWorldBounds(true);
+enemy.setVelocityX(100); // Moves horizontally
+`;
+      case 6:
+        return `// Unit 6: Add Score System
+// Display score and update it when the player collects an item.
+let score = 0;
+const scoreText = this.add.text(16, 16, 'score: 0', { fontSize: '32px', fill: '#000' });
+
+function collectItem(player, item) {
+  item.disableBody(true, true);
+  score += 10;
+  scoreText.setText('Score: ' + score);
+}`;
+      case 7:
+        return `// Unit 7: Create Collectibles
+// Add collectible items that disappear when collected.
+const items = this.physics.add.group({
+  key: 'star',
+  repeat: 5,
+  setXY: { x: 12, y: 0, stepX: 70 }
+});
+
+items.children.iterate(function (child) {
+  child.setBounceY(Phaser.Math.FloatBetween(0.4, 0.8));
+});`;
+      case 8:
+        return `// Unit 8: Game Over Condition
+// Implement game over when the player touches an enemy.
+this.physics.add.collider(player, enemy, () => {
+  this.physics.pause();
+  player.setTint(0xff0000);
+  player.anims.play('turn');
+  gameOver = true;
+});`;
+      case 9:
+        return `// Unit 9: Add Sound Effects
+// Play sound effects when certain events occur.
+const jumpSound = this.sound.add('jump');
+
+function playJumpSound() {
+  jumpSound.play();
+}
+
+if (this.cursors.up.isDown && player.body.touching.down) {
+  playJumpSound();
+  player.setVelocityY(-330);
+}`;
+      case 10:
+        return `// Unit 10: Add Background Music
+// Loop background music during the game.
+const backgroundMusic = this.sound.add('backgroundMusic', { loop: true });
+backgroundMusic.play();`;
       default:
         return "";
     }
@@ -76,18 +160,15 @@ function update () {
           <div className="lg:w-1/5 p-4 bg-gray-100 min-h-[100vh] border-r border-gray-300">
             <h2 className="text-2xl font-bold mb-4">Learning Units</h2>
             <ul>
-              <li
-                className={`mb-2 cursor-pointer ${unit === 1 ? "font-semibold text-blue-600" : "hover:text-blue-600"}`}
-                onClick={() => setUnit(1)}
-              >
-                Unit 1: Create Platform & Character
-              </li>
-              <li
-                className={`mb-2 cursor-pointer ${unit === 2 ? "font-semibold text-blue-600" : "hover:text-blue-600"}`}
-                onClick={() => setUnit(2)}
-              >
-                Unit 2: Character Movement
-              </li>
+              {unitDescriptions.map((description, unitIndex) => (
+                <li
+                  key={unitIndex}
+                  className={`mb-2 cursor-pointer ${unit === unitIndex + 1 ? "font-semibold text-blue-600" : "hover:text-blue-600"}`}
+                  onClick={() => setUnit(unitIndex + 1)}
+                >
+                  {`Unit ${unitIndex + 1}: ${description}`}
+                </li>
+              ))}
             </ul>
           </div>
         )}
