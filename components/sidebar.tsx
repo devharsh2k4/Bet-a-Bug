@@ -36,20 +36,23 @@ export const Sidebar = ({ className }: Props) => {
         /> */}
         {/* <SidebarItem label="Quests" href="/quests" iconSrc="/quests.svg" /> */}
         {/* <SidebarItem label="Shop" href="/shop" iconSrc="/shop.svg" /> */}
+        <SidebarItem label="Game" href="/game" iconSrc="/console.png" />
         <SidebarItem label="Battle" href="/battle" iconSrc="/battle.svg" />
-        <SidebarItem label="Custom" href="/custom" iconSrc="/custom.svg" />
+        <SidebarItem label="Course" href="/course" iconSrc="/course.png" />
         <SidebarItem
           label="Opportunities"
           href="/opportunities"
           iconSrc="/job.svg"
         />
-        <SidebarItem label="Course" href="/course" iconSrc="/course.png" />
+        <SidebarItem label="Custom" href="/custom" iconSrc="/custom.svg" />
+        
+      
         <SidebarItem
           label="Dashboard"
           href="/dashboard"
           iconSrc="/dashboard.png"
         />
-        <SidebarItem label="Game" href="/game" iconSrc="/dashboard.png" />
+        
       </div>
       <div className="p-4">
         <ClerkLoading>
