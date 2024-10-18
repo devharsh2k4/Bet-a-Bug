@@ -57,67 +57,40 @@ const CONTRACT_ABI = [
   },
 ];
 
-const matchTypes = [
-  { type: "1v1", image: "/onevone.webp", description: "Classic 1v1 battle." },
-  { type: "TagTeam", image: "/tagteam.webp", description: "Team up with a partner for a duo showdown." },
-  { type: "TripleThreat", image: "/tripleThreat.webp", description: "Three players, one winner. All vs all." },
-  { type: "FatalFourWay", image: "/fatal4way.webp", description: "Four players face off in a brutal contest." },
-  { type: "RoyalRumble", image: "/royalrumble.webp", description: "A battle royale-style match with multiple players." },
-];
-
 export default function CodingBattle() {
   const [step, setStep] = useState<1 | 2>(1); // Step 1: Select Match, Step 2: Select Mode
-  const [selectedMatchType, setSelectedMatchType] = useState<string | null>(null);
+  const [selectedMatchType, setSelectedMatchType] = useState<"1v1" | "TagTeam" | "TripleThreat" | "FatalFourWay" | "RoyalRumble" | null>(null);
   const [selectedMode, setSelectedMode] = useState<"Ranked" | "Practice" | null>(null);
-  const [_loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [walletAddress, setWalletAddress] = useState<string | null>(null);
   const [question, setQuestion] = useState<string>("function add(a, b) {\n  // Your code here\n}");
   const [timeLeft, setTimeLeft] = useState<number>(0); // Timer initially 0
   const [result, setResult] = useState<string | null>(null);
   const [showConfetti, setShowConfetti] = useState<boolean>(false);
-  const [_cameraStream, _setCameraStream] = useState<MediaStream | null>(null);
+  const [cameraStream, setCameraStream] = useState<MediaStream | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false); // For showing submission animation
   const [matchStarted, setMatchStarted] = useState(false); // Tracks if the match has started
   const router = useRouter(); // Initialize useRouter
-  const [socket, setSocket] = useState<WebSocket | null>(null);
 
   const cameraRef = useRef<HTMLVideoElement | null>(null);
   const { width, height } = useWindowSize();
 
+  const matchTypes = [
+    { type: "1v1", image: "/onevone.webp", description: "Classic 1v1 battle." },
+    { type: "Tag Team", image: "/tagteam.webp", description: "Team up with a partner for a duo showdown." },
+    { type: "Triple Threat", image: "/tripleThreat.webp", description: "Three players, one winner. All vs all." },
+    { type: "Fatal Four Way", image: "/fatal4way.webp", description: "Four players face off in a brutal contest." },
+    { type: "Royal Rumble", image: "/royalrumble.webp", description: "A battle royale-style match with multiple players." },
+  ];
+
   useEffect(() => {
-    const ws = new WebSocket('ws://localhost:8080'); // Connect to WebSocket server
-    setSocket(ws);
-
-    ws.onmessage = (message) => {
-      const data = JSON.parse(message.data);
-
-      switch (data.type) {
-        case 'matchStart':
-          setMatchStarted(true);
-          setTimeLeft(300);
-          break;
-
-        case 'matchReady':
-          alert(data.message);
-          break;
-
-        case 'matchEnd':
-          setResult(data.result);
-          setShowConfetti(true);
-          setTimeout(() => {
-            router.push('/battle');
-          }, 2000);
-          break;
-
-        default:
-          break;
-      }
-    };
-
-    return () => {
-      ws.close(); // Cleanup WebSocket connection
-    };
-  }, [router]);
+    if (selectedMode && timeLeft > 0 && matchStarted) {
+      const timer = setTimeout(() => setTimeLeft(timeLeft - 1), 1000);
+      return () => clearTimeout(timer);
+    } else if (timeLeft === 0 && selectedMode === "Ranked" && matchStarted) {
+      handleSubmit();
+    }
+  }, [timeLeft, selectedMode, matchStarted]);
 
   const connectWallet = async (): Promise<void> => {
     if (!window.ethereum) {
@@ -130,13 +103,9 @@ export default function CodingBattle() {
     setWalletAddress(accounts[0]);
   };
 
-  const joinRankedGame = async () => {
+  const joinGame = async () => {
     if (!walletAddress) await connectWallet();
 
-    // Send message to WebSocket server to join ranked match
-    socket?.send(JSON.stringify({ type: 'joinRanked' }));
-
-    // Place bet
     const provider = new ethers.providers.Web3Provider(window.ethereum);
     const signer = provider.getSigner();
     const contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
@@ -146,8 +115,10 @@ export default function CodingBattle() {
       setIsSubmitting(true); // Start submission animation
       const tx = await contract.joinGame({ value: ethers.utils.parseEther("0.0001") });
       await tx.wait();
-
-      socket?.send(JSON.stringify({ type: 'betPlaced', matchId: 'some_match_id' }));
+      alert("Successfully joined the game!");
+      setMatchStarted(true); // Start the match here
+      setTimeLeft(300); // Start timer only after match starts
+      startCamera(); // Start camera when the match starts
     } catch (error) {
       console.error("Error joining game:", error);
     } finally {
@@ -156,10 +127,80 @@ export default function CodingBattle() {
     }
   };
 
-  const handleSubmit = async () => {
-    const isCorrect = eval(question + "; add(2, 3) === 5");
-    socket?.send(JSON.stringify({ type: 'submitSolution', result: isCorrect ? 'win' : 'lose', matchId: 'some_match_id' }));
+  const startPractice = () => {
+    setSelectedMode("Practice");
+    setMatchStarted(true);
+    setTimeLeft(300); // For practice mode, start timer immediately
+    startCamera(); // Start camera for practice mode
   };
+
+  const startRanked = async () => {
+    setSelectedMode("Ranked");
+    await joinGame(); // Start ranked match after ETH submission
+  };
+
+  const handleSubmit = () => {
+    try {
+      const isCorrect = eval(question + "; add(2, 3) === 5");
+      if (isCorrect) {
+        alert("Correct answer submitted!");
+        setShowConfetti(true);
+        setResult("You won!");
+
+        if (selectedMode === "Ranked") {
+          submitSolution(true);
+        }
+
+        // After submitting the correct solution, navigate to the battle page
+        setTimeout(() => {
+          router.push("/battle");
+        }, 2000); // Redirect after 2 seconds to show confetti
+      } else {
+        alert("Incorrect solution. Please try again.");
+        if (selectedMode === "Ranked") {
+          submitSolution(false);
+        }
+      }
+    } catch (error) {
+      console.error("Error compiling code:", error);
+      alert("There is an error in your code.");
+    }
+  };
+
+  const submitSolution = async (isCorrect: boolean) => {
+    const provider = new ethers.providers.Web3Provider(window.ethereum);
+    const signer = provider.getSigner();
+    const contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
+
+    try {
+      const tx = await contract.submitSolution(isCorrect);
+      await tx.wait();
+    } catch (error) {
+      console.error("Error submitting solution:", error);
+    }
+  };
+
+  const startCamera = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+      setCameraStream(stream);
+      if (cameraRef.current) {
+        cameraRef.current.srcObject = stream;
+      }
+    } catch (error) {
+      console.error("Error accessing camera:", error);
+    }
+  };
+
+  const stopCamera = () => {
+    if (cameraStream) {
+      cameraStream.getTracks().forEach((track) => track.stop());
+    }
+  };
+
+  useEffect(() => {
+    return () => stopCamera(); // Stop the camera when the component unmounts
+  }, []);
 
   return (
     <div className="h-screen flex flex-col items-center justify-center text-black p-6">
@@ -175,7 +216,7 @@ export default function CodingBattle() {
                 key={type}
                 className="border-2 rounded-lg p-6 cursor-pointer shadow-lg hover:shadow-xl transition transform hover:scale-105 border-gray-300"
                 onClick={() => {
-                  setSelectedMatchType(type); // Setting the selected match type
+                  setSelectedMatchType(type as "1v1" | "TagTeam" | "TripleThreat" | "FatalFourWay" | "RoyalRumble");
                   setStep(2); // Move to step 2 after selecting match type
                 }}
               >
@@ -199,10 +240,10 @@ export default function CodingBattle() {
         <>
           <h2 className="text-4xl mb-6 font-bold">Selected Match: {selectedMatchType}</h2>
           <div className="flex space-x-4">
-            <Button onClick={joinRankedGame} className="px-8 py-4 bg-blue-500 text-white font-bold rounded-lg shadow-lg">
+            <Button onClick={startRanked} className="px-8 py-4 bg-blue-500 text-white font-bold rounded-lg shadow-lg">
               Start Ranked
             </Button>
-            <Button onClick={() => setSelectedMode("Practice")} className="px-8 py-4 bg-green-500 text-white font-bold rounded-lg shadow-lg">
+            <Button onClick={startPractice} className="px-8 py-4 bg-green-500 text-white font-bold rounded-lg shadow-lg">
               Start Practice
             </Button>
           </div>

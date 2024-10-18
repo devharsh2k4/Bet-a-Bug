@@ -97,13 +97,14 @@ const Dashboard: React.FC = () => {
           <p className="text-3xl font-bold">23</p>
         </div>
         {/* Locked Badge */}
-        <div className="bg-gray-100 p-6 rounded-lg text-center border border-gray-300">
+        <div className="bg-gray-100 p-6 rounded-lg text-center border border-gray-300 flex flex-col items-center">
           <h3 className="text-lg font-medium">Locked Badge</h3>
-          <p className="text-sm text-gray-600">Oct LeetCoding Challenge</p>
+          <p className="text-sm text-gray-600"></p>
+          <Image src="/battle.svg" alt="Locked Badge" width={40} height={40} className='w-8 h-8' />
         </div>
         {/* Submissions */}
         <div className="bg-gray-100 p-6 rounded-lg text-center border border-gray-300">
-          <h3 className="text-lg font-medium">Submissions This Year</h3>
+          <h3 className="text-lg font-medium">Submissions </h3>
           <p className="text-3xl font-bold">37</p>
         </div>
       </div>

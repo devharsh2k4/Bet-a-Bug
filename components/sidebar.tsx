@@ -25,20 +25,31 @@ export const Sidebar = ({ className }: Props) => {
           </h1>
         </div>
       </Link>
-      <div className="flex flex-col gap-y-2 flex-1 overflow-y-auto max-h-[calc(100vh-64px)] scrollbar-hidden"> {/* Added custom class for hidden scrollbar */}
+      <div className="flex flex-col gap-y-2 flex-1 overflow-y-auto max-h-[calc(100vh-64px)] scrollbar-hidden">
+        {" "}
+        {/* Added custom class for hidden scrollbar */}
         <SidebarItem label="Learn" href="/learn" iconSrc="/learn.svg" />
-        <SidebarItem
+        {/* <SidebarItem
           label="Leaderboard"
           href="/leaderboard"
           iconSrc="/leaderboard.svg"
-        />
-        <SidebarItem label="Quests" href="/quests" iconSrc="/quests.svg" />
+        /> */}
+        {/* <SidebarItem label="Quests" href="/quests" iconSrc="/quests.svg" /> */}
         <SidebarItem label="Shop" href="/shop" iconSrc="/shop.svg" />
         <SidebarItem label="Battle" href="/battle" iconSrc="/battle.svg" />
         <SidebarItem label="Custom" href="/custom" iconSrc="/custom.svg" />
-        <SidebarItem label="Opportunities" href="/opportunities" iconSrc="/job.svg" />
+        <SidebarItem
+          label="Opportunities"
+          href="/opportunities"
+          iconSrc="/job.svg"
+        />
         <SidebarItem label="Course" href="/course" iconSrc="/course.png" />
-        <SidebarItem label="Dashboard" href="/dashboard" iconSrc="/dashboard.png" />
+        <SidebarItem
+          label="Dashboard"
+          href="/dashboard"
+          iconSrc="/dashboard.png"
+        />
+        <SidebarItem label="Game" href="/game" iconSrc="/dashboard.png" />
       </div>
       <div className="p-4">
         <ClerkLoading>
