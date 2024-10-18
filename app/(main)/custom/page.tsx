@@ -1,182 +1,143 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import io from "socket.io-client";
-import { useRouter } from "next/navigation";
-import { motion } from "framer-motion";
-import { ethers } from "ethers";
+import React, { useState } from "react";
 import MonacoEditor from "@monaco-editor/react";
+import { Button } from "@/components/ui/button"; 
+import { motion } from "framer-motion";
 import Confetti from "react-confetti";
 import { useWindowSize } from "react-use";
-import Image from "next/image";
-import { Button } from "@/components/ui/button";
 
-declare global {
-  interface Window {
-    ethereum: ethers.providers.ExternalProvider;
+
+// Dynamically import the GameCanvas component to avoid server-side rendering
+// const _GameCanvas = dynamic(() => import('@/components/GameCanvas'), { ssr: false });
+
+const mazeSize = 5; // 5x5 maze grid
+
+// Create an initial maze structure with all problems locked
+type MazeCell = {
+  solved: boolean;
+  question: string;
+};
+
+const createMaze = () => {
+  const maze: MazeCell[][] = [];
+  for (let i = 0; i < mazeSize; i++) {
+    maze.push([]);
+    for (let j = 0; j < mazeSize; j++) {
+      maze[i].push({
+        solved: false,
+        question: `Solve problem at (${i}, ${j})`,
+      });
+    }
   }
-}
+  // Unlock the starting point
+  maze[0][0].solved = true;
+  return maze;
+};
 
-const socket = io("http://localhost:3001");
-
-const _CONTRACT_ADDRESS = "0x5658f10fE45b021D578a1cbDaD4eD11e8868D0Cb";
-const _CONTRACT_ABI = [
-  // Contract ABI structure here...
-];
-
-const CustomBattlePage: React.FC = () => {
-  const [roomID, setRoomID] = useState<string>("");
-  const [_isHost, setIsHost] = useState<boolean>(false);
-  const [_isRoomFull, setIsRoomFull] = useState<boolean>(false);
-  const [errorMessage, setErrorMessage] = useState<string>("");
-  const [_selectedMode, _setSelectedMode] = useState<"Ranked" | "Practice" | null>(null);
-  const [selectedMatchType, setSelectedMatchType] = useState<string | null>(null);
-  const [_walletAddress, setWalletAddress] = useState<string | null>(null);
-  const [code, setCode] = useState<string>("");
-  const [timeLeft, _setTimeLeft] = useState<number>(300);
-  const [result, setResult] = useState<string | null>(null);
+const MazeCompetitionPage = () => {
+  const [maze, setMaze] = useState(createMaze());
+  const [currentPosition, setCurrentPosition] = useState([0, 0]); // Starting at [0, 0]
+  const [code, setCode] = useState<string>(""); // Code state for editor
+  const [problem, setProblem] = useState<string>("Solve problem at (0, 0)");
   const [showConfetti, setShowConfetti] = useState<boolean>(false);
-  const router = useRouter();
+  const [timeLeft, _setTimeLeft] = useState<number>(300); // 5-minute timer
   const { width, height } = useWindowSize();
 
-  const matchTypes = [
-    { type: "1v1", image: "/onevone.webp", description: "Classic 1v1 battle." },
-    { type: "Tag Team", image: "/tagteam.webp", description: "Team up with a partner for a duo showdown." },
-    { type: "Triple Threat", image: "/tripleThreat.webp", description: "Three players, one winner. All vs all." },
-    { type: "Fatal Four Way", image: "/fatal4way.webp", description: "Four players face off in a brutal contest." },
-    { type: "Royal Rumble", image: "/royalrumble.webp", description: "A battle royale-style match with multiple players." },
-  ];
-
-  useEffect(() => {
-    socket.on("roomCreated", (id: string) => {
-      setRoomID(id);
-      setIsHost(true);
-    });
-
-    socket.on("roomJoined", (id: string) => {
-      setRoomID(id);
-      setIsRoomFull(false);
-    });
-
-    socket.on("startBattle", () => {
-      router.push("/battle/start?name=Host&opponent=Player");
-    });
-
-    socket.on("error", (message: string) => {
-      setErrorMessage(message);
-    });
-
-    return () => {
-      socket.off("roomCreated");
-      socket.off("roomJoined");
-      socket.off("startBattle");
-      socket.off("error");
-    };
-  }, [router]);
-
-  const connectWallet = async (): Promise<void> => {
-    if (!window.ethereum) {
-      alert("Please install MetaMask to continue.");
-      return;
-    }
-
-    const provider = new ethers.providers.Web3Provider(window.ethereum);
-    const accounts = await provider.send("eth_requestAccounts", []);
-    setWalletAddress(accounts[0]);
-  };
-
-  const _handleCreateRoom = () => {
-    const roomID = Math.random().toString(36).substring(2, 9);
-    socket.emit("createRoom", roomID);
-    setIsRoomFull(true);
-  };
-
-  const _handleJoinRoom = () => {
-    if (roomID) {
-      socket.emit("joinRoom", roomID);
-      setIsRoomFull(true);
-    } else {
-      setErrorMessage("Please enter a valid Room ID");
-    }
-  };
-
+  // Handle problem submission
   const handleSubmit = () => {
     try {
-      const isCorrect = eval(code + "; add(2, 3) === 5");
+      const isCorrect = eval(code + "; add(2, 3) === 5"); // Example check
       if (isCorrect) {
-        alert("Correct answer submitted!");
+        alert("Correct solution!");
+        unlockAdjacentCells();
         setShowConfetti(true);
-        setResult("You won!");
       } else {
-        alert("Incorrect solution. Please try again.");
+        alert("Incorrect solution. Try again.");
       }
     } catch (error) {
-      console.error("Error compiling code:", error);
+      console.error("Error in the code:", error);
       alert("There is an error in your code.");
+    }
+  };
+
+  // Unlock adjacent cells when a problem is solved
+  const unlockAdjacentCells = () => {
+    const [x, y] = currentPosition;
+    const updatedMaze = [...maze];
+
+    // Unlock adjacent cells (up, down, left, right)
+    if (x > 0) updatedMaze[x - 1][y].solved = true; // Up
+    if (x < mazeSize - 1) updatedMaze[x + 1][y].solved = true; // Down
+    if (y > 0) updatedMaze[x][y - 1].solved = true; // Left
+    if (y < mazeSize - 1) updatedMaze[x][y + 1].solved = true; // Right
+
+    setMaze(updatedMaze);
+  };
+
+  // Change current problem when a user clicks on a maze cell
+  const handleCellClick = (x: number, y: number) => {
+    if (maze[x][y].solved) {
+      setCurrentPosition([x, y]);
+      setProblem(`Solve problem at (${x}, ${y})`);
     }
   };
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-white text-gray-800 p-4">
       {showConfetti && <Confetti width={width} height={height} />}
-
       <motion.h1
-        className="text-5xl font-extrabold mb-8 font-nagato"
+        className="text-5xl font-extrabold mb-8"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 1 }}
       >
-        Custom 1v1 Battle
+        Maze Competition
       </motion.h1>
 
-      {errorMessage && <div className="text-red-500 mb-4">{errorMessage}</div>}
-
-      {!selectedMatchType ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
-          {matchTypes.map(({ type, image, description }) => (
+      {/* Maze Map */}
+      <div className="grid grid-cols-5 gap-4 mb-6">
+        {maze.map((row, i) =>
+          row.map((cell, j) => (
             <div
-              key={type}
-              className="border-2 rounded-lg p-6 cursor-pointer shadow-lg hover:shadow-xl transition transform hover:scale-105 border-gray-300"
-              onClick={() => setSelectedMatchType(type)}
+              key={`${i}-${j}`}
+              onClick={() => handleCellClick(i, j)}
+              className={`h-16 w-16 flex items-center justify-center cursor-pointer rounded-lg shadow-md ${
+                cell.solved ? "bg-green-300" : "bg-gray-300"
+              }`}
             >
-              <Image src={image} alt={type} height={200} width={200} className="h-32 w-full object-cover mb-4 rounded-lg shadow-md" />
-              <h3 className="text-xl font-semibold text-center">{type}</h3>
-              <p className="text-sm text-center text-gray-500 mt-2">{description}</p>
+              {i === currentPosition[0] && j === currentPosition[1] ? "Current" : cell.solved ? "Solved" : "Locked"}
             </div>
-          ))}
+          ))
+        )}
+      </div>
+
+      {/* Problem Area */}
+      <div className="text-center w-full max-w-4xl mb-6">
+        <h2 className="text-3xl mb-4 font-bold">Solve the Problem</h2>
+        <p className="text-lg mb-4 text-gray-700">{problem}</p>
+
+        {/* Code Editor */}
+        <div className="bg-gray-700 p-6 rounded-lg shadow-lg">
+          <MonacoEditor
+            height="300px"
+            language="javascript"
+            value={code}
+            options={{ theme: "vs-dark", minimap: { enabled: false }, fontSize: 16 }}
+            onChange={(value) => setCode(value || "")}
+          />
+          <Button className="mt-4" variant="primary" onClick={handleSubmit}>
+            Submit Solution
+          </Button>
         </div>
-      ) : (
-        <div className="text-center w-full max-w-4xl">
-          <h2 className="text-3xl mb-6 font-bold">Practice Mode</h2>
-          <div className="bg-gray-700 p-6 rounded-lg shadow-lg">
-            <div className="mb-4 flex justify-between items-start">
-              <p className="text-left font-bold text-white">Problem: Write a function `add(a, b)` that returns the sum of two numbers.</p>
-              <Button className="ml-4 px-8 py-2" variant="primary" onClick={handleSubmit}>
-                Submit Solution
-              </Button>
-            </div>
-            <MonacoEditor
-              height="400px"
-              language="javascript"
-              value={code}
-              options={{ theme: "vs-dark", minimap: { enabled: false }, fontSize: 16 }}
-              onChange={(value) => setCode(value || "")}
-            />
-          </div>
 
-          {timeLeft > 0 && (
-            <p className="mt-4 text-red-500 text-lg font-semibold">Time Left: {timeLeft} seconds</p>
-          )}
-
-          {result && <p className="mt-6 text-2xl font-bold text-green-500">{result}</p>}
-        </div>
-      )}
-
-      <Button onClick={connectWallet} className="mt-6 bg-blue-500 px-6 py-3 text-white font-bold rounded-lg shadow-lg">
-        Connect Wallet
-      </Button>
+        {/* Timer */}
+        {timeLeft > 0 && (
+          <p className="mt-4 text-red-500 text-lg font-semibold">Time Left: {timeLeft} seconds</p>
+        )}
+      </div>
     </div>
   );
 };
 
-export default CustomBattlePage;
+export default MazeCompetitionPage;
